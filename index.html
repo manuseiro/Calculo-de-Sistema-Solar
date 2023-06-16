@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <title>Calcular o Retorno do Sistema Solar</title>
+</head>
+<body>
+  <div class="container py-5">
+    <h1 class="fw-bold mb-4">Configurações do Sistema:</h1>
+    <form id="solarCalcForm">
+      <div class="mb-3">
+        <label for="modules" class="form-label">Quantidade de Módulos</label>
+        <input type="number" class="form-control" id="modules" required>
+      </div>
+      <div class="mb-3">
+        <label for="modulePower" class="form-label">Potência do Módulo (Watts)</label>
+        <input type="number" class="form-control" id="modulePower" required>
+      </div>
+      <div class="mb-3">
+        <label for="sunHours" class="form-label">Horas de Sol por Dia</label>
+        <input type="number" class="form-control" id="sunHours" required>
+      </div>
+      <div class="mb-3">
+        <label for="tariffRate" class="form-label">Tarifa de Energia Elétrica (R$/kWh)</label>
+        <input type="number" class="form-control" id="tariffRate" step="0.01" required>
+      </div>
+      <div class="mb-3">
+        <label for="co2Emission" class="form-label">Média de Emissão de CO2 por kWh (kg/kWh)</label>
+        <input type="number" class="form-control" id="co2Emission" step="0.0001" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Calcular</button>
+    </form>
+    <hr class="my-4">
+    <h2 class="fs-5 fw-bold mb-3">Resultados:</h2>
+    <table class="table table-striped">
+      <tbody>
+        <tr>
+          <td>Capacidade Total do Sistema Solar (kW)</td>
+          <td id="solarCapacity"></td>
+        </tr>
+        <tr>
+          <td>kWh Gerado p/Mês</td>
+          <td id="monthlyEnergy"></td>
+        </tr>
+        <tr>
+          <td>Economia Mensal (R$)</td>
+          <td id="monthlySavings"></td>
+        </tr>
+        <tr>
+          <td>Economia Anual (R$)</td>
+          <td id="annualSavings"></td>
+        </tr>
+        <tr>
+          <td>Toneladas de CO2 não emitidas por Mês</td>
+          <td id="monthlyCO2Savings"></td>
+        </tr>
+        <tr>
+          <td>Toneladas de CO2 não emitidas por Ano</td>
+          <td id="annualCO2Savings"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#solarCalcForm').submit(function(event) {
+        event.preventDefault();
+
+        const modules = $('#modules').val();
+        const modulePower = $('#modulePower').val();
+        const sunHours = $('#sunHours').val();
+        const tariffRate = $('#tariffRate').val();
+        const co2Emission = $('#co2Emission').val();
+
+        const solarCapacity = (modules * modulePower / 1000).toFixed(2);
+        const monthlyEnergy = (solarCapacity * sunHours * 30).toFixed(2);
+        const monthlySavings = (monthlyEnergy * tariffRate).toFixed(2);
+        const annualSavings = (monthlySavings * 12).toFixed(2);
+        const monthlyCO2Savings = (monthlyEnergy * co2Emission / 1000000).toFixed(6);
+        const annualCO2Savings = (monthlyCO2Savings * 12).toFixed(6);
+
+        $('#solarCapacity').text(solarCapacity);
+        $('#monthlyEnergy').text(monthlyEnergy);
+        $('#monthlySavings').text(monthlySavings);
+        $('#annualSavings').text(annualSavings);
+        $('#monthlyCO2Savings').text(monthlyCO2Savings);
+        $('#annualCO2Savings').text(annualCO2Savings);
+      });
+    });
+  </script>
+</body>
+</html>
