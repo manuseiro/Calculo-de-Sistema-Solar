@@ -27,10 +27,6 @@
         <label for="tariffRate" class="form-label">Tarifa de Energia Elétrica (R$/kWh)</label>
         <input type="number" class="form-control" id="tariffRate" step="0.01" required>
       </div>
-      <div class="mb-3">
-        <label for="co2Emission" class="form-label">Média de Emissão de CO2 por kWh (kg/kWh)</label>
-        <input type="number" class="form-control" id="co2Emission" step="0.0001" required>
-      </div>
       <button class="btn btn-primary" type="submit">Calcular</button>
     </form>
     <hr class="my-4">
@@ -53,14 +49,6 @@
           <td>Economia Anual (R$)</td>
           <td id="annualSavings"></td>
         </tr>
-        <tr>
-          <td>Toneladas de CO2 não emitidas por Mês</td>
-          <td id="monthlyCO2Savings"></td>
-        </tr>
-        <tr>
-          <td>Toneladas de CO2 não emitidas por Ano</td>
-          <td id="annualCO2Savings"></td>
-        </tr>
       </tbody>
     </table>
   </div>
@@ -75,21 +63,16 @@
         const modulePower = $('#modulePower').val();
         const sunHours = $('#sunHours').val();
         const tariffRate = $('#tariffRate').val();
-        const co2Emission = $('#co2Emission').val();
 
         const solarCapacity = (modules * modulePower / 1000).toFixed(2);
         const monthlyEnergy = (solarCapacity * sunHours * 30).toFixed(2);
         const monthlySavings = (monthlyEnergy * tariffRate).toFixed(2);
         const annualSavings = (monthlySavings * 12).toFixed(2);
-        const monthlyCO2Savings = (monthlyEnergy * co2Emission / 1000000).toFixed(6);
-        const annualCO2Savings = (monthlyCO2Savings * 12).toFixed(6);
 
         $('#solarCapacity').text(solarCapacity);
         $('#monthlyEnergy').text(monthlyEnergy);
         $('#monthlySavings').text(monthlySavings);
         $('#annualSavings').text(annualSavings);
-        $('#monthlyCO2Savings').text(monthlyCO2Savings);
-        $('#annualCO2Savings').text(annualCO2Savings);
       });
     });
   </script>
