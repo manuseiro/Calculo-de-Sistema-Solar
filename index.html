@@ -30,7 +30,7 @@
       <button class="btn btn-primary" type="submit">Calcular</button>
     </form>
     <hr class="my-4">
-    <h2 class="fs-5 fw-bold mb-3">Resultados:</h2>
+    <h2 class="fs-5 fw-bold mb-3">Retorno do Sistema:</h2>
     <table class="table table-striped">
       <tbody>
         <tr>
@@ -57,7 +57,6 @@
   <script>
     $(document).ready(function() {
       // Aplicar máscara para o campo "sunHours"
-      $('#sunHours').inputmask("99:99");
       $('#sunHours').inputmask("99:99");
 
       $('#solarCalcForm').submit(function(event) {
