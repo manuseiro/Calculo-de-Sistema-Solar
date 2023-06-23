@@ -65,6 +65,13 @@ Os resultados seriam os seguintes:
 - CO2 não Emitidas P/Mês (Toneladas): 2,573037 toneladas
 - CO2 não Emitidas P/Ano (Toneladas): 30,876444 toneladas
 
+##Tecnologias utilizadas
+
+- HTML
+- Bootstrap 5.3.0
+- Jquery 3.6.0
+- Jquery InputMask 5.0.6
+
 ## Observações
 
 - O script utiliza a biblioteca jQuery e o framework Bootstrap para fornecer uma interface interativa.
