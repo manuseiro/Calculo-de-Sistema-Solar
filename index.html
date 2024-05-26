@@ -12,12 +12,12 @@
     <h1 class="fw-bold mb-4">Configurações do Sistema:</h1>
     <form id="solarCalcForm">
       <div class="mb-3">
-        <label for="latitude" class="form-label">Latitude</label>
-        <input type="number" step="any" class="form-control" id="latitude" required>
+        <label for="city" class="form-label">Cidade</label>
+        <input type="text" class="form-control" id="city" required>
       </div>
       <div class="mb-3">
-        <label for="longitude" class="form-label">Longitude</label>
-        <input type="number" step="any" class="form-control" id="longitude" required>
+        <label for="state" class="form-label">Estado</label>
+        <input type="text" class="form-control" id="state" required>
       </div>
       <div class="mb-3">
         <label for="modules" class="form-label">Quantidade de Módulos</label>
@@ -62,31 +62,42 @@
       $('#solarCalcForm').submit(function(event) {
         event.preventDefault();
 
-        const latitude = $('#latitude').val();
-        const longitude = $('#longitude').val();
+        const city = $('#city').val();
+        const state = $('#state').val();
         const modules = $('#modules').val();
         const modulePower = $('#modulePower').val();
         const tariffRate = $('#tariffRate').val();
 
-        const apiUrl = `https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`;
+        const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${city},${state}&key=YOUR_OPENCAGE_API_KEY`;
 
-        $.get(apiUrl, function(data) {
-          if (data.status === "OK") {
-            const sunrise = new Date(data.results.sunrise);
-            const sunset = new Date(data.results.sunset);
-            const sunHours = (sunset - sunrise) / (1000 * 60 * 60); // Convertendo milissegundos para horas
+        $.get(geocodeUrl, function(geocodeData) {
+          if (geocodeData.results.length > 0) {
+            const latitude = geocodeData.results[0].geometry.lat;
+            const longitude = geocodeData.results[0].geometry.lng;
 
-            const solarCapacity = (modules * modulePower / 1000).toFixed(2);
-            const monthlyEnergy = (solarCapacity * sunHours * 30).toFixed(2);
-            const monthlySavings = (monthlyEnergy * tariffRate).toFixed(2);
-            const annualSavings = (monthlySavings * 12).toFixed(2);
+            const sunriseSunsetUrl = `https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`;
 
-            $('#solarCapacity').text(solarCapacity);
-            $('#monthlyEnergy').text(monthlyEnergy);
-            $('#monthlySavings').text(monthlySavings);
-            $('#annualSavings').text(annualSavings);
+            $.get(sunriseSunsetUrl, function(data) {
+              if (data.status === "OK") {
+                const sunrise = new Date(data.results.sunrise);
+                const sunset = new Date(data.results.sunset);
+                const sunHours = (sunset - sunrise) / (1000 * 60 * 60); // Convertendo milissegundos para horas
+
+                const solarCapacity = (modules * modulePower / 1000).toFixed(2);
+                const monthlyEnergy = (solarCapacity * sunHours * 30).toFixed(2);
+                const monthlySavings = (monthlyEnergy * tariffRate).toFixed(2);
+                const annualSavings = (monthlySavings * 12).toFixed(2);
+
+                $('#solarCapacity').text(solarCapacity);
+                $('#monthlyEnergy').text(monthlyEnergy);
+                $('#monthlySavings').text(monthlySavings);
+                $('#annualSavings').text(annualSavings);
+              } else {
+                alert('Erro ao obter dados de radiação solar.');
+              }
+            });
           } else {
-            alert('Erro ao obter dados de radiação solar.');
+            alert('Erro ao obter coordenadas para a localização fornecida.');
           }
         });
       });
