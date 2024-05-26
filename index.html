@@ -68,7 +68,7 @@
         const modulePower = $('#modulePower').val();
         const tariffRate = $('#tariffRate').val();
 
-        const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${city},${state}&key=YOUR_OPENCAGE_API_KEY`;
+        const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${city},${state}&key=f114d72cbdd94f28a183719026688b68`;
 
         $.get(geocodeUrl, function(geocodeData) {
           if (geocodeData.results.length > 0) {
