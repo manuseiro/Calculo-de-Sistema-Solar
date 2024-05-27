@@ -42,6 +42,10 @@
           <td id="solarCapacity"></td>
         </tr>
         <tr>
+          <td>Horas de Sol por Dia</td>
+          <td id="sunHours"></td>
+        </tr>
+        <tr>
           <td>kWh Gerado p/Mês</td>
           <td id="monthlyEnergy"></td>
         </tr>
@@ -68,7 +72,7 @@
         const modulePower = $('#modulePower').val();
         const tariffRate = $('#tariffRate').val();
 
-        const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${city},${state}&key=f114d72cbdd94f28a183719026688b68`;
+        const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${city},${state}&key=YOUR_OPENCAGE_API_KEY`;
 
         $.get(geocodeUrl, function(geocodeData) {
           if (geocodeData.results.length > 0) {
@@ -81,7 +85,7 @@
               if (data.status === "OK") {
                 const sunrise = new Date(data.results.sunrise);
                 const sunset = new Date(data.results.sunset);
-                const sunHours = (sunset - sunrise) / (1000 * 60 * 60); // Convertendo milissegundos para horas
+                const sunHours = ((sunset - sunrise) / (1000 * 60 * 60)).toFixed(2); // Convertendo milissegundos para horas
 
                 const solarCapacity = (modules * modulePower / 1000).toFixed(2);
                 const monthlyEnergy = (solarCapacity * sunHours * 30).toFixed(2);
@@ -89,6 +93,7 @@
                 const annualSavings = (monthlySavings * 12).toFixed(2);
 
                 $('#solarCapacity').text(solarCapacity);
+                $('#sunHours').text(sunHours);
                 $('#monthlyEnergy').text(monthlyEnergy);
                 $('#monthlySavings').text(monthlySavings);
                 $('#annualSavings').text(annualSavings);
