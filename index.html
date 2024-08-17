@@ -1,56 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="style.css">
+  <!-- Metadados do documento -->
+  <meta charset="UTF-8"> <!-- Define a codificação de caracteres como UTF-8 -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Compatibilidade com o modo IE -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Ajusta a largura do viewport para a largura do dispositivo -->
+  
+  <!-- Links para estilos externos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"> <!-- Estilos Bootstrap -->
+  <link rel="stylesheet" href="style.css"> <!-- Estilos customizados do projeto -->
+  
+  <!-- Título da página -->
   <title>CRSS - Calcular o Retorno do Sistema Solar</title>
 </head>
 <body>
+  <!-- Container principal -->
   <div class="container py-5">
+    <!-- Título da seção -->
     <h1 class="fw-bold mb-4">Configurações do Sistema:</h1>
+    
+    <!-- Formulário para capturar dados do usuário -->
     <form id="solarCalcForm">
+      <!-- Campo para seleção do estado -->
       <div class="mb-3">
         <label for="state" class="form-label">Estado</label>
         <select class="form-select" id="state" required>
-          <option value="">Selecione um estado</option>
+          <option value="">Selecione um estado</option> <!-- Opção padrão -->
         </select>
       </div>
+      
+      <!-- Campo para seleção da cidade -->
       <div class="mb-3">
         <label for="city" class="form-label">Cidade</label>
         <select class="form-select" id="city" required>
-          <option value="">Selecione uma cidade</option>
+          <option value="">Selecione uma cidade</option> <!-- Opção padrão -->
         </select>
       </div>
+      
+      <!-- Campo para inserir o consumo médio mensal -->
       <div class="mb-3">
         <label for="monthlyConsumption" class="form-label">Consumo Médio Mensal (kWh)</label>
         <input type="number" class="form-control" id="monthlyConsumption" min="0.01" step="0.01" required>
       </div>
+      
+      <!-- Campo para inserir a quantidade de módulos -->
       <div class="mb-3">
         <label for="modules" class="form-label">Quantidade de Módulos</label>
         <input type="number" class="form-control" id="modules" min="1" step="1" required>
       </div>
+      
+      <!-- Campo para inserir a potência do módulo -->
       <div class="mb-3">
         <label for="modulePower" class="form-label">Potência do Módulo (Watts)</label>
         <input type="number" class="form-control" id="modulePower" min="1" step="1" required>
       </div>
+      
+      <!-- Campo para inserir a tarifa de energia elétrica -->
       <div class="mb-3">
         <label for="tariffRate" class="form-label">Tarifa de Energia Elétrica (R$/kWh)</label>
         <input type="number" class="form-control" id="tariffRate" min="0.01" step="0.01" required>
       </div>
+      
+      <!-- Campo para inserir o fator de emissão de CO2 -->
       <div class="mb-3">
         <label for="emissionFactor" class="form-label">Fator de Emissão de CO2 (kg CO2/kWh)</label>
         <input type="number" class="form-control" id="emissionFactor" value="0.092" step="0.001" required>
       </div>
+      
+      <!-- Botão para submeter o formulário -->
       <button class="btn btn-primary" type="submit">Calcular</button>
     </form>
+    
+    <!-- Alerta para avisar sobre discrepâncias no número de módulos -->
     <div id="moduleWarning" class="alert alert-warning mt-4" style="display: none;"></div>
-    <hr class="my-4">
+    
+    <hr class="my-4"> <!-- Linha horizontal separadora -->
+    
+    <!-- Seção para exibir os resultados -->
     <h2 class="fs-5 fw-bold mb-3">Retorno do Sistema:</h2>
     <table class="table table-striped">
       <tbody>
+        <!-- Linhas da tabela que exibem os cálculos -->
         <tr>
           <td>Capacidade Total do Sistema Solar (kW)</td>
           <td id="solarCapacity"></td>
@@ -82,23 +112,31 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Inclusão do jQuery via CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  
+  <!-- Script JavaScript para manipulação do DOM e requisições AJAX -->
   <script>
     $(document).ready(function() {
+      // Carrega a lista de estados ao carregar a página
       loadStates();
 
+      // Atualiza a lista de cidades quando um estado é selecionado
       $('#state').change(function() {
-        const stateId = $(this).val();
+        const stateId = $(this).val(); // Obtém o ID do estado selecionado
         if (stateId) {
-          loadCities(stateId);
+          loadCities(stateId); // Carrega as cidades do estado selecionado
         } else {
-          $('#city').empty().append(new Option('Selecione uma cidade', ''));
+          $('#city').empty().append(new Option('Selecione uma cidade', '')); // Limpa a lista de cidades se nenhum estado for selecionado
         }
       });
 
+      // Manipula o envio do formulário
       $('#solarCalcForm').submit(function(event) {
-        event.preventDefault();
+        event.preventDefault(); // Evita o envio padrão do formulário
 
+        // Coleta os dados inseridos no formulário
         const city = $('#city').val();
         const state = $('#state').val();
         const monthlyConsumption = parseFloat($('#monthlyConsumption').val());
@@ -107,51 +145,59 @@
         const tariffRate = parseFloat($('#tariffRate').val());
         const emissionFactor = parseFloat($('#emissionFactor').val());
 
-        // Validação adicional
+        // Validação adicional para garantir que os valores sejam positivos
         if (monthlyConsumption <= 0 || modulePower <= 0 || modules <= 0) {
           alert('Consumo mensal, potência do módulo e quantidade de módulos devem ser valores positivos.');
           return;
         }
 
+        // URL para a API de geocodificação para obter as coordenadas da cidade
         const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(city)},${encodeURIComponent(state)}&key=f114d72cbdd94f28a183719026688b68`;
 
+        // Requisição AJAX para a API de geocodificação
         $.get(geocodeUrl)
           .done(function(geocodeData) {
             console.log('Resposta da API de geocodificação:', geocodeData);
             if (geocodeData.results.length > 0) {
+              // Se a API retornar resultados, extrai as coordenadas
               const latitude = geocodeData.results[0].geometry.lat;
               const longitude = geocodeData.results[0].geometry.lng;
 
+              // URL para a API Sunrise-Sunset para obter as horas de sol
               const sunriseSunsetUrl = `https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`;
 
+              // Requisição AJAX para a API Sunrise-Sunset
               $.get(sunriseSunsetUrl)
                 .done(function(data) {
                   console.log('Resposta da API de radiação solar:', data);
                   if (data.status === "OK") {
+                    // Calcula as horas de sol com base nos horários de nascer e pôr do sol
                     const sunrise = new Date(data.results.sunrise);
                     const sunset = new Date(data.results.sunset);
                     const sunHours = ((sunset - sunrise) / (1000 * 60 * 60)).toFixed(2); // Convertendo milissegundos para horas
 
-                    const solarCapacity = (modules * modulePower / 1000).toFixed(2);
-                    const monthlyEnergy = (solarCapacity * sunHours * 30).toFixed(2);
-                    const monthlySavings = (monthlyEnergy * tariffRate).toFixed(2);
-                    const annualSavings = (monthlySavings * 12).toFixed(2);
+                    // Cálculos de capacidade do sistema solar e economia
+                    const solarCapacity = (modules * modulePower / 1000).toFixed(2); // Capacidade total do sistema solar em kW
+                    const monthlyEnergy = (solarCapacity * sunHours * 30).toFixed(2); // Energia gerada por mês em kWh
+                    const monthlySavings = (monthlyEnergy * tariffRate).toFixed(2); // Economia mensal em R$
+                    const annualSavings = (monthlySavings * 12).toFixed(2); // Economia anual em R$
+                    const co2AvoidedMonthly = (monthlyEnergy * emissionFactor).toFixed(2); // CO2 evitado por mês em kg
+                    const co2AvoidedAnnually = (co2AvoidedMonthly * 12).toFixed(2); // CO2 evitado por ano em kg
 
-                    const co2AvoidedMonthly = (monthlyEnergy * emissionFactor).toFixed(2);
-                    const co2AvoidedAnnually = (co2AvoidedMonthly * 12).toFixed(2);
+                    // Exibe os resultados no HTML
+                    $('#solarCapacity').text(`${solarCapacity} kW`);
+                    $('#sunHours').text(`${sunHours} horas`);
+                    $('#monthlyEnergy').text(`${monthlyEnergy} kWh`);
+                    $('#monthlySavings').text(`R$ ${monthlySavings}`);
+                    $('#annualSavings').text(`R$ ${annualSavings}`);
+                    $('#co2AvoidedMonthly').text(`${co2AvoidedMonthly} kg`);
+                    $('#co2AvoidedAnnually').text(`${co2AvoidedAnnually} kg`);
 
-                    $('#solarCapacity').text(solarCapacity);
-                    $('#sunHours').text(sunHours);
-                    $('#monthlyEnergy').text(monthlyEnergy);
-                    $('#monthlySavings').text(monthlySavings);
-                    $('#annualSavings').text(annualSavings);
-                    $('#co2AvoidedMonthly').text(co2AvoidedMonthly);
-                    $('#co2AvoidedAnnually').text(co2AvoidedAnnually);
-
-                    const suggestedModules = Math.ceil(monthlyConsumption / (sunHours * 30 * (modulePower / 1000)));
-                    
-                    if (modules !== suggestedModules) {
-                      $('#moduleWarning').text(`A quantidade sugerida de módulos é ${suggestedModules}. Você informou ${modules}.`).show();
+                    // Exibe um aviso se a capacidade do sistema não corresponder ao consumo médio mensal
+                    const moduleProduction = (modulePower / 1000) * sunHours * 30;
+                    const totalProduction = moduleProduction * modules;
+                    if (totalProduction < monthlyConsumption) {
+                      $('#moduleWarning').text('Aviso: A quantidade de módulos pode não ser suficiente para cobrir o consumo médio mensal.').show();
                     } else {
                       $('#moduleWarning').hide();
                     }
@@ -160,44 +206,37 @@
                   }
                 })
                 .fail(function() {
-                  alert('Erro ao obter dados de radiação solar.');
+                  alert('Erro ao se comunicar com a API de radiação solar.');
                 });
             } else {
-              alert('Erro ao obter coordenadas para a localização fornecida.');
+              alert('Erro ao obter coordenadas da cidade.');
             }
           })
           .fail(function() {
-            alert('Erro ao obter coordenadas para a localização fornecida.');
+            alert('Erro ao se comunicar com a API de geocodificação.');
           });
       });
 
+      // Função para carregar os estados usando a API do IBGE
       function loadStates() {
         const statesUrl = 'https://servicodados.ibge.gov.br/api/v1/localidades/estados';
-        $.get(statesUrl)
-          .done(function(states) {
-            states.sort((a, b) => a.nome.localeCompare(b.nome));
-            states.forEach(state => {
-              $('#state').append(new Option(state.nome, state.sigla));
-            });
-          })
-          .fail(function() {
-            alert('Erro ao obter estados.');
+        $.get(statesUrl, function(states) {
+          $('#state').empty().append(new Option('Selecione um estado', ''));
+          states.forEach(function(state) {
+            $('#state').append(new Option(state.nome, state.id)); // Preenche o select com os estados
           });
+        });
       }
 
+      // Função para carregar as cidades de acordo com o estado selecionado
       function loadCities(stateId) {
         const citiesUrl = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${stateId}/municipios`;
-        $('#city').empty().append(new Option('Selecione uma cidade', ''));
-        $.get(citiesUrl)
-          .done(function(cities) {
-            cities.sort((a, b) => a.nome.localeCompare(b.nome));
-            cities.forEach(city => {
-              $('#city').append(new Option(city.nome, city.id));
-            });
-          })
-          .fail(function() {
-            alert('Erro ao obter cidades.');
+        $.get(citiesUrl, function(cities) {
+          $('#city').empty().append(new Option('Selecione uma cidade', ''));
+          cities.forEach(function(city) {
+            $('#city').append(new Option(city.nome, city.nome)); // Preenche o select com as cidades
           });
+        });
       }
     });
   </script>
